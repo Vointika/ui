@@ -34,19 +34,15 @@ const writeStored = (t: Theme) => {
 	} catch {}
 };
 
-export const ThemeProvider = ({ children }: { children: ReactNode }) => {
-	const [theme, setThemeState] = useState<Theme>("light");
+const initialTheme = (): Theme => {
+	const stored = readStored();
+	if (stored) return stored;
+	if (typeof document === "undefined") return "light";
+	return document.documentElement.classList.contains("dark") ? "dark" : "light";
+};
 
-	useEffect(() => {
-		if (typeof document === "undefined") return;
-		const stored = readStored();
-		if (stored) {
-			setThemeState(stored);
-			return;
-		}
-		const isDark = document.documentElement.classList.contains("dark");
-		setThemeState(isDark ? "dark" : "light");
-	}, []);
+export const ThemeProvider = ({ children }: { children: ReactNode }) => {
+	const [theme, setThemeState] = useState<Theme>(initialTheme);
 
 	useEffect(() => {
 		if (typeof document === "undefined") return;
