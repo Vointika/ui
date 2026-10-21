@@ -11,9 +11,11 @@ import { AppFormCard } from "./AppFormCard";
 const Harness = ({
 	onSubmit,
 	errorMessage,
+	type,
 }: {
 	onSubmit: (name: string) => void;
 	errorMessage?: string | null;
+	type?: "email";
 }) => {
 	const form = useForm({
 		defaultValues: { name: "" },
@@ -28,7 +30,7 @@ const Harness = ({
 		>
 			<FieldGroup>
 				<form.Field name="name">
-					{(field) => <AppField field={field} label="Name" />}
+					{(field) => <AppField field={field} label="Name" type={type} />}
 				</form.Field>
 			</FieldGroup>
 		</AppFormCard>
@@ -64,5 +66,15 @@ describe("AppFormCard", () => {
 		);
 
 		expect(screen.getByText("Handle is already taken.")).toBeInTheDocument();
+	});
+
+	it("leaves validation to the form's own rules: the browser's check never blocks the submit", async () => {
+		const onSubmit = vi.fn();
+		renderWithProviders(<Harness onSubmit={onSubmit} type="email" />);
+
+		await userEvent.type(screen.getByLabelText("Name"), "not-an-email");
+		await userEvent.click(screen.getByRole("button", { name: "Save" }));
+
+		await waitFor(() => expect(onSubmit).toHaveBeenCalledWith("not-an-email"));
 	});
 });

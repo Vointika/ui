@@ -17,6 +17,7 @@ export const AppForm = ({
 	children,
 }: AppFormProps) => (
 	<form
+		noValidate
 		onSubmit={(e) => {
 			e.preventDefault();
 			onSubmit();

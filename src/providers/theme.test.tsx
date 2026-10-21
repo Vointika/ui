@@ -23,7 +23,10 @@ const mount = () =>
 	);
 
 describe("ThemeProvider", () => {
-	beforeEach(() => localStorage.clear());
+	beforeEach(() => {
+		localStorage.clear();
+		document.documentElement.classList.remove("light", "dark");
+	});
 
 	it("persists a toggle, and the write survives StrictMode's double render", async () => {
 		const { getByTestId } = mount();
@@ -48,5 +51,14 @@ describe("ThemeProvider", () => {
 		mount();
 		await act(async () => setTheme("dark"));
 		expect(localStorage.getItem("theme")).toBe("dark");
+	});
+
+	it("keeps the dark the page's script chose from the system preference, under StrictMode, with nothing stored", () => {
+		document.documentElement.classList.add("dark");
+		const { getByTestId } = mount();
+
+		expect(getByTestId("theme").textContent).toBe("dark");
+		expect(document.documentElement.classList.contains("dark")).toBe(true);
+		expect(document.documentElement.classList.contains("light")).toBe(false);
 	});
 });
